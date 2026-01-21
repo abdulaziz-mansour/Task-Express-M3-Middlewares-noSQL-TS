@@ -1,10 +1,12 @@
 import Post from "../../models/Post";
 import { Request, Response } from "express";
+import Author from "../../models/Author";
 
-export const getPosts = async (req: Request, res: Response) => {
+export const getAllPosts = async (req: Request, res: Response) => {
     try {
-        const posts = await Post.find();
-        res.json(posts);
+        const posts = await Post.find().populate("author");
+
+        res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({ message: "Error fetching posts" });
     }
@@ -12,9 +14,10 @@ export const getPosts = async (req: Request, res: Response) => {
 
 export const createPost = async (req: Request, res: Response) => {
     try {
-        const { title, body } = req.body;
-        const post = await Post.create({ title, body });
-        res.json(post);
+        const { title, body, authorID } = req.body;
+        const post = await Post.create({ title, body, author: authorID });
+        const author = Author.findByIdAndUpdate(authorID, { $push: { post: post._id } })
+        res.json({ post, author });
     } catch (error) {
         res.status(500).json({ message: "Error creating post" });
     }
