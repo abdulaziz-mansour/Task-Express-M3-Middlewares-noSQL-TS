@@ -15,11 +15,38 @@ export const getAllPosts = async (req: Request, res: Response) => {
 export const createPost = async (req: Request, res: Response) => {
     try {
         const { title, body, authorID } = req.body;
-        const post = await Post.create({ title, body, author: authorID });
-        const author = Author.findByIdAndUpdate(authorID, { $push: { post: post._id } })
-        res.json({ post, author });
-    } catch (error) {
-        res.status(500).json({ message: "Error creating post" });
+        if (req.file) {
+            req.body.image = req.file.path;
+        }
+        console.log(req.file)
+
+        const author = await Author.findById(authorID);
+        if (!author) {
+            res.status(404).json({ error: "Author not found" });
+            return
+        }
+        console.log(author)
+
+        const post = await Post.create({
+            title,
+            body,
+            author: authorID,
+            image: req.body.image
+        });
+
+        console.log(post)
+
+
+        await Author.findByIdAndUpdate(
+            authorID,
+            { $push: { posts: post._id } },
+            { new: true }
+        );
+
+        res.status(201).json({ post, author });
+    } catch (error: any) {
+        console.log(error.message)
+        res.status(500).json({ message: error.message });
     }
 };
 

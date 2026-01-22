@@ -13,7 +13,8 @@ const postSchema = new Schema({
     tags: [{
         type: Schema.Types.ObjectId,
         ref: "Tag"
-    }]
+    }],
+    image: { type: String }
 });
 
 const Post = model("Post", postSchema);

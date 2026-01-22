@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Author from "../../models/Author";
 
 const createAuthor = async (req: Request, res: Response) => {
@@ -16,12 +16,12 @@ const createAuthor = async (req: Request, res: Response) => {
     }
 };
 
-const getAllAuthor = async (req: Request, res: Response) => {
+const getAllAuthor = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const Authors = await Author.find().populate("posts");
         res.status(200).json({ message: "Found all authors", data: Authors });
     } catch (error) {
-        res.status(500).json({ errorMsg: error });
+        next(error)
     }
 };
 
